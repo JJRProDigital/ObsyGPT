@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+node_modules/
+dist/
+.vite/
+
+.env
+.env.*
+!.env.example
+backend/uploads/
+_logs/
+backend/workspace/
+plugins/marketplaces/

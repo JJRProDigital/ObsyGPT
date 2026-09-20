@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: obsygpt-postgres
+    environment:
+      POSTGRES_DB: obsygpt
+      POSTGRES_USER: obsygpt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obsygpt_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - obsygpt_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obsygpt -d obsygpt"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: obsygpt-backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DATABASE_URL: postgresql://obsygpt:${POSTGRES_PASSWORD:-obsygpt_dev_password}@postgres:5432/obsygpt
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SESSION_SECRET: ${SESSION_SECRET:-local-development-secret-change-me}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      AGENT_WORKSPACE_ROOT: /data/workspace
+    volumes:
+      - obsygpt_workspace:/data/workspace
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend-modern
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-}
+    container_name: obsygpt-frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  obsygpt_postgres_data:
+  obsygpt_workspace:
