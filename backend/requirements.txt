@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+itsdangerous
+psycopg[binary,pool]
+openai
+Werkzeug
+gunicorn
+pytest
+httpx
+python-multipart
+pypdf
+alembic
+cryptography
