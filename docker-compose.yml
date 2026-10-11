@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: obsygpt-postgres
+    environment:
+      POSTGRES_DB: obsygpt
+      POSTGRES_USER: obsygpt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obsygpt_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - obsygpt_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obsygpt -d obsygpt"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: obsygpt-backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DATABASE_URL: postgresql://obsygpt:${POSTGRES_PASSWORD:-obsygpt_dev_password}@postgres:5432/obsygpt
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SESSION_SECRET: ${SESSION_SECRET:-local-development-secret-change-me}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      AGENT_WORKSPACE_ROOT: /data/workspace
+      VOICE_DATA_DIR: /app/voice-data
+      HF_HOME: /app/voice-data/hf
+      FASTEMBED_CACHE_PATH: /app/voice-data/fastembed
+      VOICE_STT_MODEL: ${VOICE_STT_MODEL:-medium}
+      VOICE_STT_LANGUAGE: ${VOICE_STT_LANGUAGE:-es}
+      VOICE_TTS_VOICE: ${VOICE_TTS_VOICE:-es_ES-sharvard-medium}
+    volumes:
+      - obsygpt_workspace:/data/workspace
+      - obsygpt_voice_data:/app/voice-data
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+
+  frontend:
+    build:
+      context: ./frontend-modern
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-}
+    container_name: obsygpt-frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  obsygpt_voice_data:
+  obsygpt_postgres_data:
+  obsygpt_workspace:
