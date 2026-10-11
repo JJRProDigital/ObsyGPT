@@ -1,0 +1,74 @@
+site_name: ObsyGPT Docs
+site_description: Documentación de ObsyGPT — agentes IA self-hosted con chat, voz, Telegram, triggers y más.
+site_url: https://docs.obsygpt.local
+repo_url: https://github.com/JJRProDigital/ObsyGPT
+repo_name: ObsyGPT
+
+theme:
+  name: material
+  language: es
+  logo: assets/logo-header.svg
+  favicon: assets/logo-header.svg
+  custom_dir: overrides
+  font:
+    text: Inter
+    code: IBM Plex Mono
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+  features:
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Inicio: index.md
+  - Empezar:
+      - Primeros pasos: primeros-pasos/index.md
+      - Recorrido visual: primeros-pasos/recorrido.md
+      - Modelos locales: modelos-locales.md
+      - Proveedores de LLM: proveedores.md
+  - Trabajar:
+      - Chat: chat.md
+      - Agentes: agentes.md
+      - Skills: skills.md
+      - Herramientas y aprobaciones: herramientas.md
+      - Proyectos: proyectos.md
+      - Tareas: tareas.md
+      - Memoria: memoria.md
+  - Extender:
+      - MCP: mcp.md
+      - Conectores: conectores.md
+      - Plugins: plugins.md
+  - Automatizar:
+      - Telegram: telegram.md
+      - Triggers proactivos: triggers.md
+      - Voz: voz.md
+  - Operación:
+      - Seguridad: seguridad.md
+      - API compatible con OpenAI: api-openai.md
+      - Monitorización: monitoreo.md
