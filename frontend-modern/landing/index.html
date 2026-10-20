@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ObsyGPT: workspace self-hosted de agentes IA. Chat agéntico con aprobaciones, voz, Telegram, triggers proactivos y trazabilidad total. Obsessive Solutions." />
+  <title>ObsyGPT — Obsessive Solutions</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f1efea' stroke='%23d5b06d' stroke-width='4'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='28' fill='%231e312f'%3EOS%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1e312f; --ink-rgb: 30, 49, 47;
+      --accent: #d5b06d; --accent-rgb: 213, 176, 109;
+      --paper: #f1efea; --paper-rgb: 241, 239, 234;
+      --color-cta: #1e312f; --color-cta-hover: #152422;
+      --color-accent: #d5b06d; --color-accent-strong: #6e5423;
+      --color-bg: #f1efea; --color-text: #1e312f;
+      --color-text-muted: #3d524f; --color-text-subtle: #5c6f6c;
+      --color-border: rgba(30, 49, 47, .12); --color-border-strong: rgba(30, 49, 47, .22);
+      --color-success: #2f6b4f; --color-danger: #9b2c2c;
+      --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+      --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+      --radius-md: 8px;
+      --shadow-card: 0 10px 28px -18px rgba(30, 49, 47, .22);
+      --shadow-float: 0 22px 44px -24px rgba(30, 49, 47, .32);
+      --ease-out-soft: cubic-bezier(.33, 1, .68, 1);
+      --lp-max: 1120px; --lp-gutter: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: var(--font-sans); font-size: 15px; line-height: 1.55; color: var(--color-text);
+      -webkit-font-smoothing: antialiased; background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse 90% 55% at 100% -10%, rgba(var(--accent-rgb), .16), transparent 58%),
+        radial-gradient(ellipse 70% 45% at 0% 110%, rgba(var(--ink-rgb), .07), transparent 52%);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    .lp { background: linear-gradient(180deg, transparent 0, transparent 55%), radial-gradient(ellipse 55% 40% at 110% 25%, rgba(var(--accent-rgb), .05), transparent 55%), radial-gradient(ellipse 55% 40% at -10% 30%, rgba(var(--ink-rgb), .06), transparent 50%), var(--paper); }
+    .lp a:not(.lp-btn) { color: inherit; }
+    .lp-skip { position: absolute; left: -999px; top: 0; z-index: 100; padding: .6rem 1rem; background: var(--ink); color: var(--paper); }
+    .lp-skip:focus { left: .75rem; top: .75rem; }
+    .lp-wrap { width: min(var(--lp-max), calc(100% - var(--lp-gutter) * 2)); margin-inline: auto; }
+    .lp-kicker { margin: 0 0 .75rem; font-family: var(--font-mono); font-size: .72rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--color-accent-strong); }
+    .lp-banner { background: var(--ink); color: var(--paper); font-size: .88rem; }
+    .lp-banner a { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .65rem 1rem; }
+    .lp-banner a:hover { color: var(--accent); }
+    .lp-banner__dot { width: .45rem; height: .45rem; border-radius: 99px; background: var(--accent); flex-shrink: 0; }
+    .lp-header { position: sticky; top: 0; z-index: 40; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); background: rgba(var(--paper-rgb), .86); border-bottom: 1px solid var(--color-border); }
+    .lp-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.25rem; }
+    .lp-brand { display: flex; align-items: center; gap: .7rem; min-height: 44px; }
+    .lp-brand__mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--paper); color: var(--ink); font-family: var(--font-serif); font-weight: 900; font-size: .66rem; border: 2px solid var(--accent); box-shadow: 0 0 8px 1px rgba(var(--accent-rgb), .5); }
+    .lp-brand__name { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; }
+    .lp-nav { display: none; align-items: center; gap: 1.35rem; }
+    .lp-nav a { font-size: .92rem; font-weight: 500; color: var(--color-text-muted); }
+    .lp-nav a:hover, .lp-nav a:focus-visible { color: var(--ink); }
+    .lp-header__cta { display: none; align-items: center; gap: .5rem; }
+    .lp-menu-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: #fff; cursor: pointer; color: var(--ink); }
+    .lp-btn:focus-visible, .lp-nav a:focus-visible, .lp-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .lp-drawer { display: none; flex-direction: column; gap: .35rem; padding: .5rem 0 1rem; }
+    .lp-drawer.is-open { display: flex; }
+    .lp-drawer a { padding: .7rem .2rem; font-weight: 500; min-height: 44px; display: flex; align-items: center; }
+    .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 44px; padding: .55rem 1.15rem; border-radius: 999px; border: 1px solid transparent; font: inherit; font-weight: 600; font-size: .92rem; cursor: pointer; transition: background .18s var(--ease-out-soft), color .18s var(--ease-out-soft), border-color .18s var(--ease-out-soft), transform .18s var(--ease-out-soft); }
+    .lp-btn:active { transform: scale(.98); }
+    .lp-btn--primary { background: var(--ink); color: var(--paper); }
+    .lp-btn--primary:hover { background: var(--color-cta-hover); color: var(--paper); }
+    .lp-btn--ghost { background: transparent; border-color: var(--color-border-strong); color: var(--ink); }
+    .lp-btn--ghost:hover { border-color: var(--ink); background: #fff; color: var(--ink); }
+    .lp-btn--gold { background: var(--accent); color: var(--ink); }
+    .lp-btn--gold:hover { filter: brightness(1.05); color: var(--ink); }
+    .lp-section--ink .lp-btn--ghost { color: var(--paper); border-color: #f1efea8c; background: transparent; }
+    .lp-section--ink .lp-btn--ghost:hover { color: var(--paper); background: #f1efea1f; border-color: var(--paper); }
+    .lp-btn--lg { min-height: 48px; padding-inline: 1.35rem; }
+    .lp-hero { padding: 3rem 0 2.5rem; }
+    .lp-hero__grid { display: grid; gap: 2.25rem; }
+    .lp-hero h1 { margin: 0 0 1rem; font-family: var(--font-serif); font-size: clamp(2.15rem, 6vw, 3.65rem); font-weight: 900; line-height: 1.08; letter-spacing: -.03em; }
+    .lp-hero h1 em { font-style: italic; color: var(--color-accent-strong); font-weight: 700; }
+    .lp-hero__lead { margin: 0 0 1.5rem; max-width: 38rem; font-size: 1.08rem; line-height: 1.65; color: var(--color-text-muted); }
+    .lp-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-bottom: .85rem; }
+    .lp-micro { margin: 0; font-size: .85rem; color: var(--color-text-subtle); }
+    .lp-canvas { position: relative; background: #fff; border: 1px solid var(--color-border); border-radius: 18px; box-shadow: var(--shadow-float); padding: 1rem; overflow: hidden; }
+    .lp-canvas__bar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .9rem; font-size: .78rem; font-family: var(--font-mono); color: var(--color-text-subtle); }
+    .lp-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .55rem; border-radius: 999px; background: #2f6b4f1f; color: var(--color-success); font-weight: 600; }
+    .lp-canvas__flow { display: flex; flex-direction: column; gap: .45rem; }
+    .lp-node { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .7rem; padding: .65rem .8rem; border-radius: 12px; border: 1px solid var(--color-border); background: var(--paper); font-size: .88rem; }
+    .lp-node--branch { background: #fff; border-style: dashed; }
+    .lp-node__kind { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; color: var(--color-accent-strong); }
+    .lp-node__out { font-size: .75rem; font-weight: 600; color: var(--color-text-subtle); }
+    .lp-play { margin-top: 1.35rem; padding: 1rem 1.05rem 1.1rem; border-radius: 14px; border: 1px solid var(--color-border); background: #ffffffb3; }
+    .lp-play h3 { margin: 0 0 .75rem; font-size: 1rem; }
+    .lp-play__row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-bottom: .75rem; }
+    .lp-chip { border: 1px solid var(--color-border-strong); background: #fff; border-radius: 999px; padding: .4rem .75rem; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; min-height: 40px; }
+    .lp-chip:hover { border-color: var(--ink); }
+    .lp-chip--on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .lp-play__note { margin: 0; font-size: .85rem; color: var(--color-text-muted); }
+    .lp-section { padding: 4rem 0; }
+    .lp-section--ink { background: var(--ink); color: var(--paper); }
+    .lp-section--ink .lp-kicker { color: var(--accent); }
+    .lp-section--ink h2 { color: var(--paper); }
+    .lp-section--muted { background: #ffffff73; }
+    .lp-section h2 { margin: 0 0 .75rem; font-family: var(--font-serif); font-size: clamp(1.7rem, 3.6vw, 2.5rem); line-height: 1.15; letter-spacing: -.025em; }
+    .lp-section h2 em { font-style: italic; font-weight: 700; color: var(--color-accent-strong); }
+    .lp-section--ink h2 em { color: var(--accent); }
+    .lp-lede { margin: 0 0 2rem; max-width: 40rem; color: var(--color-text-muted); font-size: 1.05rem; line-height: 1.65; }
+    .lp-section--ink .lp-lede { color: #f1efeac7; }
+    .lp-compare { display: grid; gap: 1rem; }
+    .lp-card { background: #fff; border: 1px solid var(--color-border); border-radius: 16px; padding: 1.25rem 1.3rem 1.35rem; }
+    .lp-card--warn { background: #fbf6f2; }
+    .lp-card--ok { background: #f4f7f4; border-color: #2f6b4f38; }
+    .lp-card h3 { margin: 0 0 .85rem; font-size: 1.05rem; }
+    .lp-card ol, .lp-card ul { margin: 0; padding-left: 1.15rem; color: var(--color-text-muted); }
+    .lp-card li + li { margin-top: .35rem; }
+    .lp-quote { margin: 1rem 0 0; padding: .75rem .85rem; border-radius: 10px; background: #9b2c2c14; color: var(--color-danger); font-size: .9rem; }
+    .lp-ok { margin: 1rem 0 0; padding: .75rem .85rem; border-radius: 10px; background: #2f6b4f1a; color: var(--color-success); font-weight: 600; font-size: .9rem; }
+    .lp-bento { display: grid; gap: .9rem; }
+    .lp-bento article { background: #fff; border: 1px solid var(--color-border); border-radius: 16px; padding: 1.2rem; }
+    .lp-bento h3 { margin: .35rem 0 .45rem; font-size: 1.05rem; }
+    .lp-bento p { margin: 0; color: var(--color-text-muted); font-size: .95rem; }
+    .lp-bento .lp-kicker { margin-bottom: 0; }
+    .lp-shots { display: grid; gap: 1rem; }
+    .lp-tabs { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .lp-tabs button { border: 1px solid var(--color-border); background: #fff; border-radius: 999px; padding: .45rem .85rem; min-height: 40px; cursor: pointer; font: inherit; font-weight: 600; font-size: .85rem; }
+    .lp-tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .lp-frame { margin: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--color-border); box-shadow: var(--shadow-card); background: var(--ink); }
+    .lp-frame img { display: block; width: 100%; height: auto; }
+    .lp-chat { display: grid; gap: .55rem; max-width: 28rem; }
+    .lp-bubble { padding: .75rem .9rem; border-radius: 14px; font-size: .92rem; line-height: 1.45; }
+    .lp-bubble--me { background: #2a423f; color: var(--paper); border-bottom-right-radius: 4px; }
+    .lp-bubble--them { background: #fff; color: var(--ink); border: 1px solid var(--color-border); border-bottom-left-radius: 4px; }
+    .lp-bubble--bad { background: #9b2c2c1a; color: #f0c9c9; border: 1px dashed rgba(155, 44, 44, .45); }
+    .lp-list-check { margin: 1.25rem 0 0; padding: 0; list-style: none; }
+    .lp-list-check li { position: relative; padding-left: 1.5rem; margin-bottom: .45rem; }
+    .lp-list-check li:before { content: ""; position: absolute; left: 0; top: .45rem; width: .55rem; height: .55rem; border-radius: 99px; background: var(--accent); }
+    .lp-split { display: grid; gap: 1.5rem; align-items: start; }
+    .lp-code { margin: 0; padding: 1.1rem 1.2rem; border-radius: 14px; background: #152422; color: #e8e4dc; font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; overflow-x: auto; }
+    .lp-faq details { border-bottom: 1px solid var(--color-border); }
+    .lp-faq summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.05rem 0; font-weight: 600; min-height: 44px; }
+    .lp-faq summary::-webkit-details-marker { display: none; }
+    .lp-faq summary:after { content: "+"; font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-accent-strong); }
+    .lp-faq details[open] summary:after { content: "\2013"; }
+    .lp-faq p { margin: 0 0 1.1rem; color: var(--color-text-muted); max-width: 42rem; }
+    .lp-cta-final { text-align: center; }
+    .lp-cta-final h2 { margin-inline: auto; max-width: 18ch; }
+    .lp-cta-final .lp-hero__actions { justify-content: center; }
+    .lp-footer { padding: 2.5rem 0 2rem; border-top: 1px solid var(--color-border); font-size: .88rem; }
+    .lp-footer__grid { display: grid; gap: 1.5rem; }
+    .lp-footer__brand p { margin: .5rem 0 0; color: var(--color-text-muted); max-width: 22rem; }
+    .lp-footer h3 { margin: 0 0 .55rem; font-size: .78rem; font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-subtle); }
+    .lp-footer ul { margin: 0; padding: 0; list-style: none; }
+    .lp-footer li + li { margin-top: .35rem; }
+    .lp-footer a:hover { color: var(--ink); text-decoration: underline; }
+    .lp-legal { margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--color-border); color: var(--color-text-subtle); font-size: .8rem; }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    @media (min-width: 768px) {
+      .lp-menu-btn, .lp-drawer { display: none !important; }
+      .lp-nav, .lp-header__cta { display: flex; }
+      .lp-hero { padding-top: 4.5rem; }
+      .lp-hero__grid, .lp-compare, .lp-shots, .lp-split, .lp-footer__grid { grid-template-columns: 1fr 1fr; }
+      .lp-footer__grid { grid-template-columns: 1.4fr 1fr 1fr; }
+      .lp-bento { grid-template-columns: repeat(4, 1fr); }
+      .lp-shots { grid-template-columns: .9fr 1.1fr; align-items: start; }
+    }
+    @media (min-width: 1024px) {
+      .lp-hero__grid { grid-template-columns: 1.05fr .95fr; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="lp">
+    <a class="lp-skip" href="#contenido">Saltar al contenido</a>
+    <div class="lp-banner">
+      <a href="/docs/"><span class="lp-banner__dot" aria-hidden="true"></span>Documentación con capturas reales &rarr;</a>
+    </div>
+    <header class="lp-header">
+      <div class="lp-wrap lp-header__inner">
+        <a class="lp-brand" href="#top">
+          <span class="lp-brand__mark" aria-hidden="true">OS</span>
+          <span class="lp-brand__name">ObsyGPT</span>
+        </a>
+        <nav class="lp-nav" aria-label="Secciones">
+          <a href="#producto">Producto</a>
+          <a href="#triggers">Triggers</a>
+          <a href="#recorrido">Recorrido</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <div class="lp-header__cta">
+          <a class="lp-btn lp-btn--primary" href="https://github.com/JJRProDigital/ObsyGPT" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+        <button type="button" class="lp-menu-btn" aria-expanded="false" aria-controls="lp-drawer" id="lp-menu-btn">
+          <span class="sr-only">Abrir menú</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="lp-wrap lp-drawer" id="lp-drawer">
+        <a href="#producto">Producto</a>
+        <a href="#triggers">Triggers</a>
+        <a href="#recorrido">Recorrido</a>
+        <a href="#faq">FAQ</a>
+        <a class="lp-btn lp-btn--primary" href="https://github.com/JJRProDigital/ObsyGPT" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <section class="lp-hero" id="top">
+        <div class="lp-wrap lp-hero__grid">
+          <div>
+            <p class="lp-kicker">Workspace de agentes IA self-hosted</p>
+            <h1>La IA propone.<br /><em>Tú apruebas.</em></h1>
+            <p class="lp-hero__lead">Chat agéntico con herramientas reales sobre tu workspace, sub-agentes en paralelo, voz, Telegram y triggers que despiertan solos. Con cualquier modelo — OpenRouter, OpenAI, Anthropic, Gemini o 100% local.</p>
+            <div class="lp-hero__actions">
+              <a class="lp-btn lp-btn--primary lp-btn--lg" href="https://github.com/JJRProDigital/ObsyGPT" target="_blank" rel="noreferrer">Ver en GitHub</a>
+              <a class="lp-btn lp-btn--ghost lp-btn--lg" href="#recorrido">Ver el recorrido</a>
+            </div>
+            <p class="lp-micro">Self-hosted: tus claves, tu infraestructura, tu criterio.</p>
+          </div>
+          <div class="lp-canvas" aria-hidden="true">
+            <div class="lp-canvas__bar">
+              <span>run &mdash; objetivo &rarr; resultado</span>
+              <span class="lp-pill">En el workspace</span>
+            </div>
+            <div class="lp-canvas__flow">
+              <div class="lp-node">
+                <span class="lp-node__kind">Plan</span>
+                <strong>Lee el objetivo</strong>
+                <span class="lp-node__out">pasos</span>
+              </div>
+              <div class="lp-node">
+                <span class="lp-node__kind">Tools</span>
+                <strong>read_file · web_fetch</strong>
+                <span class="lp-node__out">resultados</span>
+              </div>
+              <div class="lp-node lp-node--branch">
+                <span class="lp-node__kind">Aprobación</span>
+                <strong>Acción sensible</strong>
+                <span class="lp-node__out">humano</span>
+              </div>
+              <div class="lp-node">
+                <span class="lp-node__kind">Sub-agentes</span>
+                <strong>dispatch ×3 en paralelo</strong>
+                <span class="lp-node__out">ramas</span>
+              </div>
+              <div class="lp-node">
+                <span class="lp-node__kind">Entrega</span>
+                <strong>Respuesta + traza</strong>
+                <span class="lp-node__out">auditable</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" style="padding-top: 0;">
+        <div class="lp-wrap">
+          <div class="lp-play">
+            <h3>Arma tu agente</h3>
+            <div class="lp-play__row" aria-label="Capacidades del agente">
+              <span class="lp-chip lp-chip--on">Chat agéntico</span>
+              <span class="lp-chip lp-chip--on">Aprobaciones</span>
+              <span class="lp-chip lp-chip--on">Traza</span>
+            </div>
+            <div class="lp-play__row" id="lp-play-options" aria-label="Capacidades opcionales">
+              <button type="button" class="lp-chip" aria-pressed="false">Internet</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Multimodal</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Skills</button>
+              <button type="button" class="lp-chip" aria-pressed="false">MCP</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Conectores</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Telegram</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Triggers</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Voz</button>
+              <button type="button" class="lp-chip" aria-pressed="false">Sub-agentes</button>
+            </div>
+            <p class="lp-play__note" id="lp-play-note">3 capacidades base.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-section--muted" id="producto">
+        <div class="lp-wrap">
+          <p class="lp-kicker">Una posición clara</p>
+          <h2>El chatbot responde. <em>ObsyGPT ejecuta.</em></h2>
+          <p class="lp-lede">Un agente puede leer hoy, escribir mañana y necesitar tu permiso siempre que toque algo sensible. No tiene sentido tratar todo con el mismo asistente de texto.</p>
+          <div class="lp-compare">
+            <article class="lp-card lp-card--warn">
+              <h3>El asistente típico</h3>
+              <ol>
+                <li>Responde texto bonito</li>
+                <li>No puede tocar tus archivos</li>
+                <li>Tú copias y pegas el resultado</li>
+                <li>Se olvida de todo al cerrar</li>
+                <li>Nadie sabe qué hizo ni por qué</li>
+              </ol>
+              <p class="lp-quote">&laquo;¿Y esto quién lo hace? Ah, yo.&raquo;</p>
+            </article>
+            <article class="lp-card lp-card--ok">
+              <h3>En ObsyGPT</h3>
+              <ol>
+                <li>Planifica el paso a paso</li>
+                <li>Ejecuta tools en tu workspace</li>
+                <li>Te pide permiso para lo sensible</li>
+                <li>Recuerda con memoria semántica</li>
+                <li>Deja traza auditable de cada paso</li>
+              </ol>
+              <p class="lp-ok">El trabajo queda hecho. Y trazado.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="lp-wrap">
+          <p class="lp-kicker">Producto</p>
+          <h2>Cuatro capas. Un workspace.</h2>
+          <p class="lp-lede">Skills y MCP para el criterio. Tools para la ejecución. Proyectos para el contexto. Traza para la confianza.</p>
+          <div class="lp-bento">
+            <article>
+              <p class="lp-kicker">01</p>
+              <h3>Conversar</h3>
+              <p>Chat con bucle plan &rarr; actuar &rarr; observar, modos Act / Plan / Think y paleta de skills (Alt + espacio).</p>
+            </article>
+            <article>
+              <p class="lp-kicker">02</p>
+              <h3>Extender</h3>
+              <p>Skills estándar, servidores MCP, plugins y conectores (GitHub, Google Drive) con credenciales cifradas por usuario.</p>
+            </article>
+            <article>
+              <p class="lp-kicker">03</p>
+              <h3>Automatizar</h3>
+              <p>Tareas en segundo plano con recurrencia, triggers proactivos y control total desde Telegram con voz.</p>
+            </article>
+            <article>
+              <p class="lp-kicker">04</p>
+              <h3>Verificar</h3>
+              <p>Traza completa de runs y tools, aprobaciones registradas y panel de monitorización para admins.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-section--ink" id="triggers">
+        <div class="lp-wrap lp-split">
+          <div>
+            <p class="lp-kicker">Triggers proactivos</p>
+            <h2>Tus agentes despiertan solos.<br /><em>Nada de recordatorios mentales.</em></h2>
+            <p class="lp-lede">Intervalos, vigilancia de URLs y feeds, webhooks con secreto. Y los agentes pueden agendarse seguimientos a sí mismos.</p>
+            <ul class="lp-list-check">
+              <li>Intervalo fijo, vigilancia de cambio (URL/RSS) y webhook con secreto.</li>
+              <li>Modo lectura por defecto: solo tools seguras, sin sub-agentes.</li>
+              <li>Aviso por Telegram al terminar el run.</li>
+            </ul>
+          </div>
+          <div class="lp-chat">
+            <div class="lp-bubble lp-bubble--me">Vigila el blog de X y avísame si sale algo nuevo&hellip;</div>
+            <div class="lp-bubble lp-bubble--them">Hecho. Trigger cada 60 minutos en modo lectura, con cooldown y aviso por Telegram.</div>
+            <div class="lp-bubble lp-bubble--bad">Automatización ciega: corre con permisos de admin, sin candado y sin trazas.</div>
+            <p class="lp-micro" style="color: rgba(241, 239, 234, 0.7);">En ObsyGPT el trigger arranca en modo lectura. La traza recoge cada paso. No hay runs fantasma.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" id="recorrido">
+        <div class="lp-wrap lp-shots">
+          <div>
+            <p class="lp-kicker">Recorrido</p>
+            <h2>La app, no un mockup.</h2>
+            <p class="lp-lede">Capturas del workspace real. Cambia de pantalla.</p>
+            <div class="lp-tabs" role="tablist" aria-label="Pantallas del producto" id="lp-tabs">
+              <button type="button" role="tab" aria-selected="true" data-src="shots/chat.png" data-alt="Chat de ObsyGPT con herramientas y modos">Chat</button>
+              <button type="button" role="tab" aria-selected="false" data-src="shots/tasks.png" data-alt="Tareas en segundo plano de ObsyGPT">Tareas</button>
+              <button type="button" role="tab" aria-selected="false" data-src="shots/skills.png" data-alt="Biblioteca de skills de ObsyGPT">Skills</button>
+              <button type="button" role="tab" aria-selected="false" data-src="shots/agentes.png" data-alt="Configuración de agentes">Agentes</button>
+              <button type="button" role="tab" aria-selected="false" data-src="shots/monitor.png" data-alt="Panel de monitorización">Monitor</button>
+            </div>
+          </div>
+          <figure class="lp-frame">
+            <img id="lp-shot" src="shots/chat.png" alt="Chat de ObsyGPT con herramientas y modos" width="1440" height="900" />
+          </figure>
+        </div>
+      </section>
+
+      <section class="lp-section lp-section--muted">
+        <div class="lp-wrap lp-split">
+          <div>
+            <p class="lp-kicker">IA con freno de mano</p>
+            <h2>La IA actúa. <em>Tú envías.</em></h2>
+            <p class="lp-lede">Workspace acotado, entorno mínimo para comandos, allowlist por segmento, mitigación SSRF y secretos cifrados en reposo. Cada acción sensible se pausa hasta que tú la apruebes — desde la app o desde Telegram.</p>
+          </div>
+          <pre class="lp-code">SI tool = read_file          ENTONCES ejecutar
+SI tool = write_file         ENTONCES &#9995; aprobación
+SI comando &#8713; allowlist       ENTONCES &#128683; bloqueo
+SI host &#8712; localhost/privada  ENTONCES &#128737; SSRF
+SI run = trigger             ENTONCES modo lectura</pre>
+        </div>
+      </section>
+
+      <section class="lp-section" id="faq">
+        <div class="lp-wrap">
+          <p class="lp-kicker">FAQ</p>
+          <h2>Preguntas frecuentes</h2>
+          <div class="lp-faq">
+            <details>
+              <summary>¿Qué modelos puedo usar?</summary>
+              <p>Los que tú quieras: OpenRouter, OpenAI, Anthropic, Gemini, Ollama o llama.cpp — o cualquier router compatible con la API de OpenAI. Pegas la clave en el panel (se guarda cifrada) o la defines por variable de entorno. Trae fallbacks entre proveedores por si uno falla.</p>
+            </details>
+            <details>
+              <summary>¿La IA ejecuta cosas sin que yo lo vea?</summary>
+              <p>No por defecto. Las tools sensibles (escribir archivos, comandos, sub-agentes) pausan el run y te muestran una tarjeta de Aprobar / Rechazar. Las herramientas seguras (lectura, búsqueda) sí corren solas. Tú defines la política por herramienta.</p>
+            </details>
+            <details>
+              <summary>¿Dónde corre todo esto?</summary>
+              <p>En tu infraestructura: Docker, una base Postgres y tus claves. La voz (Whisper + Piper) y los embeddings son locales por defecto. Nada sale de tu máquina salvo las llamadas al proveedor de LLM que tú elijas.</p>
+            </details>
+            <details>
+              <summary>¿Puedo manejarlo desde el móvil?</summary>
+              <p>Sí: cada agente puede tener su propio bot de Telegram con allowlist. Le escribes, el mensaje se convierte en tarea en segundo plano, y las aprobaciones sensibles llegan como botones inline. También funciona por notas de voz en ambas direcciones.</p>
+            </details>
+            <details>
+              <summary>¿Cómo le enseño cosas nuevas?</summary>
+              <p>Con skills estándar (SKILL.md) editables desde la UI, servidores MCP que registras con handshake real, plugins compartibles y conectores a GitHub y Google Drive. Cada agente activa solo lo que necesita.</p>
+            </details>
+            <details>
+              <summary>¿Es compatible con el Reglamento de IA de la UE?</summary>
+              <p>El producto está pensado para uso limitado con supervisión humana: aprobaciones explícitas, trazas auditables y transparencia sobre qué se envía al modelo. El despliegue y los datos quedan en tu organización; revísalo con tu asesor legal si operas datos de clientes.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-section--ink">
+        <div class="lp-wrap lp-cta-final">
+          <p class="lp-kicker">Obsessive Solutions</p>
+          <h2>Tu infraestructura. Tus agentes.</h2>
+          <p class="lp-lede" style="margin-inline: auto;">Docker, una API key y a trabajar. La primera cuenta que crees es el administrador.</p>
+          <div class="lp-hero__actions">
+            <a class="lp-btn lp-btn--gold lp-btn--lg" href="https://github.com/JJRProDigital/ObsyGPT" target="_blank" rel="noreferrer">Ver en GitHub</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lp-footer">
+      <div class="lp-wrap lp-footer__grid">
+        <div class="lp-footer__brand">
+          <strong>ObsyGPT</strong>
+          <p>Workspace self-hosted de agentes IA de Obsessive Solutions. Chat, voz, Telegram, triggers y trazabilidad en un solo sitio.</p>
+        </div>
+        <div>
+          <h3>Producto</h3>
+          <ul>
+            <li><a href="#producto">Workspace</a></li>
+            <li><a href="#triggers">Triggers</a></li>
+            <li><a href="#recorrido">Recorrido</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Recursos</h3>
+          <ul>
+            <li><a href="/docs/">Documentación</a></li>
+            <li><a href="https://github.com/JJRProDigital/ObsyGPT" target="_blank" rel="noreferrer">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="lp-wrap lp-legal">
+        ObsyGPT es self-hosted: tus claves de API y tus datos quedan en tu infraestructura. IA con supervisión humana (aprobaciones y trazas). &copy; <span id="lp-year">2026</span> Obsessive Solutions.
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var year = document.getElementById("lp-year");
+      if (year) year.textContent = String(new Date().getFullYear());
+
+      var menuBtn = document.getElementById("lp-menu-btn");
+      var drawer = document.getElementById("lp-drawer");
+      if (menuBtn && drawer) {
+        menuBtn.addEventListener("click", function () {
+          var open = drawer.classList.toggle("is-open");
+          menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        drawer.addEventListener("click", function (event) {
+          if (event.target.tagName === "A") {
+            drawer.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      var note = document.getElementById("lp-play-note");
+      var base = 3;
+      document.querySelectorAll("#lp-play-options .lp-chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          var on = chip.classList.toggle("lp-chip--on");
+          chip.setAttribute("aria-pressed", on ? "true" : "false");
+          var count = base + document.querySelectorAll("#lp-play-options .lp-chip--on").length;
+          if (note) note.textContent = count + " capacidades activas.";
+        });
+      });
+
+      var shot = document.getElementById("lp-shot");
+      var tabs = document.getElementById("lp-tabs");
+      if (tabs && shot) {
+        tabs.addEventListener("click", function (event) {
+          var btn = event.target.closest("button[data-src]");
+          if (!btn) return;
+          tabs.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-selected", "false"); });
+          btn.setAttribute("aria-selected", "true");
+          shot.src = btn.getAttribute("data-src");
+          shot.alt = btn.getAttribute("data-alt") || "";
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
