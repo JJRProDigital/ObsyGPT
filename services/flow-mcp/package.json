@@ -1,0 +1,21 @@
+{
+  "name": "obsygpt-flow-mcp",
+  "version": "1.0.0",
+  "description": "Google Flow image generation (Nano Banana) as an MCP service for ObsyGPT. Vendored from srz-google-flow-mcp (MIT) and containerized: Chromium + Xvfb + noVNC + HTTP JSON-RPC bridge.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "mcp": "node src/mcp.js",
+    "bridge": "node bridge.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "playwright-core": "^1.63.0",
+    "zod": "^4.6.5"
+  }
+}
