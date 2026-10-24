@@ -1,0 +1,26 @@
+{
+  "slug": "github-dev-pack",
+  "name": "GitHub Dev Pack",
+  "version": "1.0.0",
+  "description": "Pack de desarrollo GitHub: skill de revision de PRs, conector requerido y sub-agente code-reviewer.",
+  "skills": [
+    {
+      "name": "review-pr",
+      "description": "Revisar un pull request de GitHub y devolver hallazgos priorizados con evidencia del codigo.",
+      "argument_hint": "owner/repo (usa github_list_issues para ver PRs abiertos)",
+      "triggers": ["user"],
+      "body": "# Revision de Pull Requests\n\nCuando el usuario pida revisar un PR:\n\n1. Usa `github_list_issues` con state=open para localizar el PR o issue indicado.\n2. Usa `github_read_file` para leer los archivos afectados (empieza por el diff o archivos mencionados).\n3. Evalua: correccion, seguridad, rendimiento, legibilidad y cobertura de pruebas.\n4. Devuelve un informe con secciones: **Bloqueantes**, **Importantes**, **Menores** y **Preguntas al autor**.\n5. Cita archivo y linea exacta de cada hallazgo.\n\n## Restricciones\n\n- No apruebes cambios que no hayas leido.\n- Si el token no tiene acceso al repo, dilo y sugerir al usuario que revise los permisos.\n- Nunca hagas push ni cierres el PR sin confirmacion explicita.",
+      "resources": ""
+    }
+  ],
+  "mcps": [],
+  "connectors": ["github"],
+  "agents": [
+    {
+      "name": "Code Reviewer",
+      "description": "Sub-agente especializado en revisar codigo y pull requests con evidencia.",
+      "system_prompt": "Eres Code Reviewer, un revisor de codigo riguroso. Lees el codigo con las herramientas disponibles, verificas cada afirmacion con evidencia (archivo y linea) y clasificas los hallazgos por severidad. Nunca apruebas codigo que no has leido. Tu salida final es un informe estructurado: Bloqueantes, Importantes, Menores, Preguntas al autor.",
+      "enabled": true
+    }
+  ]
+}
