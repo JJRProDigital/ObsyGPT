@@ -1,0 +1,116 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+:root {
+  --os-ink: #1e312f;
+  --os-ink-deep: #132320;
+  --os-accent: #d5b06d;
+  --os-paper: #f1efea;
+  --os-paper-muted: #d8d2c5;
+}
+
+body,
+.md-typeset {
+  background: var(--os-paper);
+  color: var(--os-ink);
+}
+
+.md-header,
+.md-footer {
+  background: var(--os-ink);
+  color: var(--os-paper);
+}
+
+.md-header .md-header__title {
+  color: var(--os-paper);
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 900;
+}
+
+.md-search__input {
+  background: var(--os-ink-deep);
+}
+
+.md-tabs {
+  background: var(--os-ink);
+}
+
+.md-sidebar--primary .md-sidebar__scrollwrap,
+.md-sidebar--secondary .md-sidebar__scrollwrap {
+  background: var(--os-paper);
+}
+
+.md-content h1,
+.md-content h2,
+.md-content h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 900;
+  color: var(--os-ink);
+}
+
+.md-content h2 {
+  border-bottom: 2px solid var(--os-accent);
+  padding-bottom: 0.3rem;
+}
+
+.md-typeset a:not(.md-button):not(.headerlink) {
+  color: var(--os-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--os-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.md-typeset a:not(.md-button):not(.headerlink):hover {
+  color: var(--os-accent);
+}
+
+.md-nav__link {
+  color: var(--os-ink);
+}
+
+.md-nav__link:hover,
+.md-nav__link--active {
+  color: var(--os-ink);
+  font-weight: 700;
+}
+
+.md-nav__item--active > .md-nav__link {
+  color: var(--os-accent);
+}
+
+.os-kicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--os-accent);
+}
+
+.md-header .md-header__button.md-logo {
+  padding: 0.12rem;
+  background: var(--os-paper);
+  border-radius: 0.4rem;
+  box-shadow: 0 0 0 1.5px var(--os-accent), 0 0 8px 2px rgba(213, 176, 109, 0.55);
+}
+
+.md-header .md-header__button.md-logo img {
+  height: 1.45rem;
+  width: 1.45rem;
+  object-fit: contain;
+}
+
+.md-typeset .screenshot {
+  border-radius: 0.6rem;
+  border: 1px solid rgba(30, 49, 47, 0.25);
+  box-shadow: 0 8px 24px rgba(19, 35, 32, 0.18);
+}
+
+.md-typeset .screenshot figcaption {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(30, 49, 47, 0.65);
+  margin-top: 0.4rem;
+}
