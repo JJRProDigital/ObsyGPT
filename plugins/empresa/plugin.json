@@ -1,0 +1,50 @@
+{
+  "slug": "empresa",
+  "name": "Harness de Empresa",
+  "version": "1.0.0",
+  "description": "Redacción con la voz de la empresa: brief aprobable, borrador y revisión, con precios y condiciones de una única fuente y revisión humana obligatoria.",
+  "skills": [
+    {
+      "name": "brief",
+      "description": "Convierte un encargo en un brief para aprobar, con preguntas abiertas en vez de datos inventados.",
+      "argument_hint": "<tipo> <encargo> — por ejemplo email Responder a un cliente que pide rebaja del 20 %",
+      "triggers": ["user"],
+      "body": "# Brief de un encargo\n\nConvierte el encargo del usuario en un brief para aprobar. La tarea del usuario trae `<tipo> <descripción>`; la primera palabra es el tipo de documento y debe existir en `tipos/`.\n\nAntes de empezar:\n1. Usa list_dir en `.` y en `tipos/` para confirmar que existe `tipos/<tipo>/guia.md`.\n2. Lee `empresa/perfil.md`, `empresa/reglas-duras.md` y `empresa/errores-vistos.md`.\n3. Lee `tipos/<tipo>/guia.md` para conocer los campos mínimos.\n\nSi el tipo no existe o falta la descripción, para y pide el dato.\n\nAl escribir:\n- Crea `trabajos/AAAA-MM-DD-<tipo>-<asunto-corto>/brief.md` con write_file. Si ya existe, para y avisa: no lo sobrescribas.\n- Frontmatter YAML: tipo, titulo, estado: borrador, aprobado_por: (vacío), fecha_aprobacion: (vacío) y ticket o referencia, si te la dan.\n- Secciones: Objetivo; Datos del encargo (un campo por cada campo mínimo de la guía del tipo); Datos que se usarán (con su fuente en `datos-maestros/` o en lo que dio el usuario); Restricciones (reglas duras que aplican); Preguntas abiertas.\n- Rellena solo con lo que dio el usuario o con datos de `datos-maestros/`. Todo campo mínimo que falte va a Preguntas abiertas: no lo inventes.\n- Si el encargo incluye un descuento, plazo o condición fuera de `datos-maestros/`, anótalo en Preguntas abiertas como «requiere aprobación».\n\nLímites:\n- Escribe únicamente el brief. No redactes el entregable.\n\nAl terminar:\n1. Muestra la ruta del brief.\n2. Lista las Preguntas abiertas y recuerda que hay que resolverlas y cambiar a mano `estado: borrador` por `estado: aprobado` (con aprobado_por y fecha) antes de `/empresa-redactar`.",
+      "resources": ""
+    },
+    {
+      "name": "redactar",
+      "description": "Escribe el borrador de un brief aprobado, usando solo datos maestros y dejándolo pendiente de revisión humana.",
+      "argument_hint": "<slug del brief> — por ejemplo 2026-10-28-email-rebaja-cliente",
+      "triggers": ["user"],
+      "body": "# Borrador de un brief aprobado\n\nLa tarea del usuario es el slug del encargo dentro de `trabajos/`.\n\nAntes de empezar:\n1. Lee `trabajos/<slug>/brief.md` y confirma que tiene `estado: aprobado` y `aprobado_por` rellenado. Si no, para y avisa.\n2. Si el brief tiene Preguntas abiertas sin resolver, para y pregunta.\n3. Lee `empresa/perfil.md`, `empresa/voz-y-estilo.md`, `empresa/reglas-duras.md` y `empresa/errores-vistos.md`.\n4. Lee `tipos/<tipo>/guia.md` y los ejemplos de `ejemplos/<tipo>/`.\n5. Si el documento lleva cifras, plazos o condiciones, lee `datos-maestros/tarifas.md` y `datos-maestros/condiciones.md`.\n\nAl redactar:\n- Escribe `trabajos/<slug>/borrador.md` con write_file, siguiendo la estructura y el formato de salida de la guía del tipo.\n- Imita el tono y el nivel de detalle de los ejemplos, sin copiar frases.\n- Usa precios, plazos y condiciones únicamente de `datos-maestros/`, con los cálculos de la guía. Si falta un dato, para y pregunta.\n- Copia tal cual los textos fijos de `condiciones.md`.\n- Cumple las reglas duras. Si el brief pide algo que las incumple, para y explica cuál.\n- Frontmatter YAML: tipo, brief, estado: pendiente de revisión humana.\n- Si hay cifras, añade al final una sección «Notas para el revisor» con los cálculos y de dónde sale cada dato.\n\nLímites:\n- No modifiques el brief ni los datos maestros.\n- Nunca envíes ni publiques nada.\n\nAl terminar:\n1. Muestra la ruta del borrador.\n2. Muestra una lista breve de las suposiciones que hayas tenido que hacer y recuerda que falta la revisión humana.",
+      "resources": ""
+    },
+    {
+      "name": "revisar",
+      "description": "Revisa un borrador contra el brief, las reglas duras y la checklist del tipo, y emite un veredicto sin editar archivos.",
+      "argument_hint": "<slug del brief> — por ejemplo 2026-10-28-email-rebaja-cliente",
+      "triggers": ["user"],
+      "body": "# Revisión de un borrador\n\nLa tarea del usuario es el slug del encargo dentro de `trabajos/`. No modifiques ningún archivo.\n\nAntes de empezar:\n1. Lee `trabajos/<slug>/brief.md` y `trabajos/<slug>/borrador.md`.\n2. Lee `empresa/voz-y-estilo.md`, `empresa/reglas-duras.md` y `empresa/errores-vistos.md`.\n3. Lee `tipos/<tipo>/guia.md` y, si hay cifras, `datos-maestros/`.\n4. Si falta el brief o el borrador, para y avisa.\n\nRevisa, en este orden:\n1. **Fidelidad al brief.** ¿Cumple el objetivo y usa los datos del brief? ¿Algo añadido que no estaba en el brief?\n2. **Reglas duras.** Cita la regla y el fragmento si hay incumplimientos.\n3. **Cifras y datos.** Recalcula cada importe, subtotal, descuento e impuesto; compara precios, plazos y condiciones con `datos-maestros/`, incluida la fecha de vigencia. Señala cualquier dato sin fuente.\n4. **Voz y estilo.** Tono, tratamiento, longitud, vocabulario a evitar, comparado con los ejemplos.\n5. **Checklist del tipo.** Pasa uno a uno los puntos de la guía.\n6. **Errores vistos.** ¿Reaparece alguno de los registrados?\n\nFormato del informe:\n- Tabla de la checklist con estado (OK / FALLA / NO APLICA) y evidencia (cita breve del borrador).\n- Lista de hallazgos por gravedad: bloqueantes (reglas duras, cifras) y menores (estilo), cada uno con el fragmento y la corrección propuesta.\n- Veredicto en una línea: LISTO PARA REVISIÓN HUMANA o REQUIERE CAMBIOS, con la razón.\n\nLímites:\n- No edites el borrador: solo informa y propone. La decisión de enviar es de una persona.\n- Si algo repetido merece una regla o un ejemplo nuevo, sugiérelo para `empresa/errores-vistos.md`.",
+      "resources": ""
+    },
+    {
+      "name": "onboarding",
+      "description": "Entrevista guiada para completar empresa/ y datos-maestros/ sin inventar datos.",
+      "argument_hint": "vacío (entrevista guiada)",
+      "triggers": ["user"],
+      "body": "# Onboarding de la empresa\n\nCompleta los archivos de `empresa/` y `datos-maestros/` entrevistando al usuario, sin inventar nada.\n\nAntes de empezar:\n1. Lee `empresa/perfil.md`, `empresa/voz-y-estilo.md`, `empresa/reglas-duras.md`, `datos-maestros/tarifas.md` y `datos-maestros/condiciones.md`: son las plantillas.\n2. Si el usuario adjunta documentos (presentaciones, tarifas, emails anteriores), úsalos para proponer valores y márcalos como «propuesto» para que los confirme.\n\nCómo trabajar:\n- Pregunta bloque por bloque, en este orden: perfil, voz y estilo, reglas duras, tarifas, condiciones. Máximo cinco preguntas por bloque.\n- Por cada pregunta, ofrece una sugerencia razonable que se pueda aceptar con «ok».\n- Para voz y estilo, pide tres emails o textos que la empresa considere bien escritos y deduce de ellos el tono; muestra lo que deduces antes de escribirlo.\n- Cuando el usuario confirme un bloque, escríbelo en su archivo con write_file.\n- Si una respuesta es ambigua o contradictoria, repregunta antes de escribir.\n- Las reglas duras y las condiciones legales las escribe el usuario o las confirma legal: no redactes cláusulas legales por tu cuenta; deja el texto exacto como TODO si no te lo dan.\n\nLímites:\n- Modifica únicamente los archivos de `empresa/` y `datos-maestros/`. No toques `tipos/`, `ejemplos/` ni `trabajos/`.\n\nAl terminar:\n1. Muestra la lista de campos que quedaron en TODO.\n2. Recuerda añadir ejemplos reales en `ejemplos/`.",
+      "resources": ""
+    }
+  ],
+  "mcps": [],
+  "connectors": [],
+  "agents": [
+    {
+      "name": "Redactor de Empresa",
+      "description": "Redacta emails, presupuestos y contenido con la voz de la empresa, sin inventar datos y sin entregar nada sin revisión humana.",
+      "system_prompt": "Eres el Redactor de Empresa. Redactas emails, presupuestos y contenido con la voz de la empresa, usando siempre los datos maestros y sin entregar nada sin revisión humana.\n\nTrabajas dentro de la carpeta del proyecto. Antes de cualquier tarea lees `empresa/voz-y-estilo.md`, `empresa/reglas-duras.md` y `empresa/errores-vistos.md`; las reglas duras están por encima de cualquier pedido.\n\nFlujo: `/empresa-brief <tipo> <encargo>` escribe el brief; una persona lo aprueba; `/empresa-redactar <slug>` escribe el borrador; `/empresa-revisar <slug>` lo revisa.\n\nReglas:\n- Los precios, plazos y condiciones salen únicamente de `datos-maestros/`. Si falta un dato, preguntas; nunca lo inventas.\n- Solo redactas briefs con `estado: aprobado`.\n- Todo borrador queda como «pendiente de revisión humana». Nunca envías ni publicas nada.\n- Si un pedido va contra las reglas duras, frenas y avisas.\n- No inventas datos, citas ni fuentes. Marca la incertidumbre.",
+      "enabled": true
+    }
+  ]
+}
