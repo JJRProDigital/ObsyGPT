@@ -1,0 +1,9 @@
+FROM squidfunk/mkdocs-material:9 AS build
+WORKDIR /docs
+COPY docs/ ./
+RUN mkdocs build
+
+FROM nginx:1.27-alpine
+COPY --from=build /docs/site /usr/share/nginx/html
+COPY docker/docs-nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
